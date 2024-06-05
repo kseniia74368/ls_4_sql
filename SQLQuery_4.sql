@@ -5,40 +5,52 @@ GO
 
 CREATE TABLE [Departments] (
 	[Id] INT IDENTITY (1, 1) NOT NULL PRIMARY KEY,
-	[Building] INT NOT NULL CHECK ([Building] BETWEEN 1 AND 5),
-	[Financing] MONEY NOT NULL CHECK ([Financing] >= 0) DEFAULT 0,
-	[Floor] INT NOT NULL CHECK ([Floor] >= 1),
 	[Name] NVARCHAR(100) NOT NULL CHECK(LEN(Name) > 0) UNIQUE
-);
-
-CREATE TABLE [Diseases] (
-	[Id] INT IDENTITY (1, 1) NOT NULL PRIMARY KEY,
-	[Name] NVARCHAR(100) NOT NULL CHECK(LEN(Name) > 0) UNIQUE,
-	[Severity] INT NOT NULL CHECK(Severity >= 1) DEFAULT 1
 );
 
 CREATE TABLE [Doctors] (
 	[Id] INT IDENTITY (1, 1) NOT NULL PRIMARY KEY,
 	[Name] NVARCHAR(MAX) NOT NULL CHECK(LEN(Name) > 0),
-	[Phone] CHAR(10) NOT NULL,
 	[Premium] MONEY NOT NULL CHECK([Premium] > 0) DEFAULT 0,
 	[Salary] MONEY NOT NULL CHECK([Salary] > 0),
-	[Surname] NVARCHAR(100) NOT NULL CHECK(LEN([Surname]) > 0)
+	[Surname] NVARCHAR(MAX) NOT NULL CHECK(LEN([Surname]) > 0)
 );
 
-CREATE TABLE [Examinations] (
-    [Id] INT IDENTITY (1, 1) NOT NULL PRIMARY KEY,
-    [DayOfWeek] INT NOT NULL CHECK (DayOfWeek >= 1 AND DayOfWeek <= 7),
-	[StartTime] TIME NOT NULL CHECK (StartTime >= '08:00' AND StartTime <= '18:00'),
-	[EndTime] TIME NOT NULL,
-	[Name] NVARCHAR(100) NOT NULL CHECK(LEN(Name) > 0) UNIQUE,
-	CONSTRAINT end_time CHECK (EndTime > StartTime)
+CREATE TABLE [Specializations] (
+	[Id] INT IDENTITY (1, 1) NOT NULL PRIMARY KEY,
+	[Name] NVARCHAR(100) NOT NULL CHECK(LEN(Name) > 0) UNIQUE
 );
 
+CREATE TABLE [Sponsors] (
+	[Id] INT IDENTITY (1, 1) NOT NULL PRIMARY KEY,
+	[Name] NVARCHAR(MAX) NOT NULL CHECK(LEN(Name) > 0)
+);
+
+CREATE TABLE [DoctorsSpecializations] (
+	[Id] INT IDENTITY (1, 1) NOT NULL PRIMARY KEY,
+	[DoctorId] INT NOT NULL FOREIGN KEY REFERENCES [Doctors](Id),
+	[SpecializationId] INT NOT NULL FOREIGN KEY REFERENCES [Specializations](Id)
+);
+
+CREATE TABLE [Donations] (
+	[Id] INT IDENTITY (1, 1) NOT NULL PRIMARY KEY,
+	[Amount] MONEY NOT NULL CHECK ([Amount] > 0),
+	[Date] DATE NOT NULL CHECK ([Date] <= GETDATE()) DEFAULT GETDATE(),
+	[DepartmentId] INT  NOT NULL FOREIGN KEY REFERENCES [Departments](Id),
+	[SponsorId] INT NOT NULL FOREIGN KEY REFERENCES [Sponsors](Id)
+);
+
+CREATE TABLE [Vacations] (
+	[Id] INT IDENTITY (1,1) NOT NULL PRIMARY KEY,
+	[StartDate] DATE NOT NULL,
+	[EndDate] DATE NOT NULL,
+	[DoctorId] INT NOT NULL FOREIGN KEY REFERENCES [Doctors](Id),
+	CONSTRAINT vacation_check CHECK ([EndDate] > [StartDate])
+);
 
 CREATE TABLE [Wards] (
 	[Id] INT IDENTITY (1, 1) NOT NULL PRIMARY KEY,
-	[Building] INT NOT NULL CHECK ([Building] BETWEEN 1 AND 5),
-	[Floor] INT NOT NULL CHECK ([Floor] >= 1),
-	[Name] NVARCHAR(20) NOT NULL CHECK(LEN(Name) > 0) UNIQUE
+	[Name] NVARCHAR(20) NOT NULL CHECK(LEN(Name) > 0) UNIQUE,
+	[DepartmentId] INT NOT NULL FOREIGN KEY REFERENCES [Departments](Id)
 );
+
